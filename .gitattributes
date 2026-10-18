@@ -1,0 +1,13 @@
+# Git for Windows defaults to core.autocrlf=true, which would check out these
+# files with CRLF endings. `exercise-b/agent-change.diff` is generated with LF
+# context lines, so a CRLF working tree makes `git apply` fail at 1:13 for
+# everyone on Windows. Pin the working tree to LF instead.
+* text=auto eol=lf
+
+# Never touch the patch itself, under any setting.
+*.diff -text
+*.patch -text
+
+# Data and transcripts are compared byte for byte elsewhere in the course.
+*.json text eol=lf
+*.jsonl text eol=lf

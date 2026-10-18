@@ -1,0 +1,32 @@
+{
+  // Use the uv-managed virtualenv in this folder, not the system Python.
+  // `uv sync` creates it; if it is missing, run `uv sync` and reload the window.
+  //
+  // On Windows the interpreter lives at .venv\Scripts\python.exe instead, so
+  // this path does not resolve there -- the Python extension then falls back to
+  // auto-discovering the workspace .venv, which finds the right one. If it does
+  // not, run "Python: Select Interpreter" and pick the ./.venv entry.
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+
+  // src layout: `triage` is imported from src/, not from site-packages.
+  // uv installs the project editable via a .pth file, which Pylance does not
+  // follow, so point the language server at src/ explicitly. Without this every
+  // `from triage... import` shows up in the Problems tab as unresolved.
+  "python.analysis.extraPaths": ["src"],
+
+  // Type-checking rules (strict, plus the named DSPy seams) come from
+  // [tool.pyright] in pyproject.toml. Pylance reads that file, so nothing is
+  // configured here on purpose -- one source of truth for `uv run pyright` and
+  // for the editor.
+
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests"],
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.dspy_cache": true
+  }
+}

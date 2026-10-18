@@ -1,0 +1,112 @@
+[project]
+name = "llm-se-2027-w1-lab"
+version = "0.1.0"
+description = "W1 lab: issue triage with an LLM component"
+requires-python = ">=3.13"
+dependencies = [
+    "dspy>=2.6",
+    "pydantic>=2.9",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pyright>=1.1.390",
+]
+
+# Why this project declares a build system.
+#
+# `uv sync` reads this section and installs the project into .venv in "editable"
+# mode: it writes a small .pth file whose entire contents are the path to this
+# repository's src/ directory. Python reads that file at startup, so src/ ends
+# up on the import path. That is what makes
+#
+#     python -m triage.cli
+#
+# work in a plain terminal on macOS, Linux and Windows alike.
+#
+# The alternative would be to set PYTHONPATH=src before every command. That is
+# spelled one way in bash and another way in PowerShell, so it is one more thing
+# for a Windows student to get wrong.
+#
+# The two settings that do the work are in [tool.hatch.build.targets.wheel]:
+#
+#   sources      = ["src"]  treat src/ as the root of the package tree, so
+#                           src/triage/ is imported as `triage` (not
+#                           `src.triage`).
+#   only-include = ["src"]  package only src/; leave tools/, tests/ and
+#                           everything else out.
+#
+# One useful consequence: because the .pth file points at the src/ DIRECTORY
+# rather than listing individual packages, any package you add under src/ later
+# is importable immediately. `triage_by_agent`, which is published partway
+# through the lab, needs no second `uv sync`.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+only-include = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# Redundant with the editable install above, but harmless, and it means
+# `pytest` still finds `triage` if someone runs it in an environment where the
+# project was never installed.
+pythonpath = ["src"]
+
+[tool.pyright]
+# Your code, and only your code. `uv run pyright` is a constraint the lab puts
+# on what you build, so it has to be a check you can actually pass: tools/ is
+# course code you did not write and are not graded on, and it does not
+# currently type-clean.
+include = ["src", "tests"]
+
+# `include` is enough for `uv run pyright` on the command line, but it is NOT
+# enough for the vscode editor: Pylance analyses whatever file you have open, whether
+# or not it is in `include`. Open tools/verify_env.py and strict mode lights up
+# the Problems tab with errors in code you did not write.
+#
+# `ignore` is the setting that both pyright and pylance respect: 
+# the files are still parsed (so go-to-definition and completion keep working) 
+# but their diagnostics are suppressed. 
+ignore = ["tools"]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+
+# The LLM boundary is the one place in this repository where types stop.
+# DSPy returns dynamically-shaped prediction objects that no type checker can
+# describe. That is not a defect in DSPy - it is what calling a stochastic
+# system looks like from inside a typed program.
+#
+# We do not turn off typing globally - instead, we name each FILE separately
+# where we decide to apply weaker forms of type checking.
+# For these files, it is your responsibility to validate data at runtime, 
+# because the type checker is not helping you.
+#
+# Do NOT "simplify" these to a directory. Pyright picks the first execution
+# environment whose root is a prefix of the file being checked, so
+# root = "src/triage" risks also matching src/triage_by_agent/... and quietly
+# relaxing code you did not write. 
+
+# Exercise A - If you call DSPy from somewhere other than extract.py, 
+# point this at that file instead. Do not widen it to a directory.
+[[tool.pyright.executionEnvironments]]
+root = "src/triage/extract.py"
+reportUnknownMemberType = "warning"
+reportUnknownVariableType = "warning"
+reportUnknownArgumentType = "warning"
+
+# Exercise B - the released package's DSPy module. 
+# It will be published at 0:45; until then this
+# entry matches nothing, which is harmless (pyright does not require the root
+# to exist).
+[[tool.pyright.executionEnvironments]]
+root = "src/triage_by_agent/extract.py"
+reportUnknownMemberType = "warning"
+reportUnknownVariableType = "warning"
+reportUnknownArgumentType = "warning"

@@ -1,0 +1,69 @@
+# Source repositories for the issue-triage dataset.
+#
+# Each repo has its own label vocabulary. GitHub labels are the ONLY ground
+# truth we get for free, so the mappings below define which course-level
+# fields have gold labels and which do not.
+#
+# Regenerate the observed label list at any time with:
+#     uv run python tools/fetch_issues.py --discover-labels
+#
+# NOTE ON GROUND TRUTH
+# --------------------
+# issue_type   -> derived from labels below. Reliable where present.
+# component    -> derived from labels below. Per-repo taxonomy, NOT normalised
+#                 across repos. A "middleware" issue in hono and an "OpenAPI"
+#                 issue in litestar are not the same category and must not be
+#                 pooled.
+# severity     -> NO GOLD LABELS in any of these three repos. This field is
+#                 deliberately left without ground truth. You will hand-label
+#                 a gold set for it later in the course.
+# has_repro    -> NO GOLD LABELS. Derivable by hand from issue text.
+
+[[repos]]
+key = "litestar"
+full_name = "litestar-org/litestar"
+language = "python"
+notes = "ASGI web framework. Structured issue templates. Component labels present."
+
+[repos.issue_type_labels]
+bug = ["Bug :bug:", "bug"]
+enhancement = ["Enhancement", "enhancement", "Feature Request"]
+documentation = ["Documentation :books:", "documentation", "docs"]
+question = ["Question", "question"]
+
+[repos.component_labels]
+openapi = ["OpenAPI"]
+dto = ["DTO"]
+di = ["Dependency Injection"]
+testing = ["Testing"]
+cli = ["CLI"]
+
+[[repos]]
+key = "hono"
+full_name = "honojs/hono"
+language = "typescript"
+notes = "Small web framework. Best structured templates: version / runtime / repro steps."
+
+[repos.issue_type_labels]
+bug = ["bug"]
+enhancement = ["enhancement"]
+documentation = ["document"]
+meta = ["announcement", "v5"]
+
+[repos.component_labels]
+middleware = ["middleware"]
+testing = ["test"]
+
+[[repos]]
+key = "textual"
+full_name = "Textualize/textual"
+language = "python"
+notes = "Terminal UI framework. Labels are SPARSE - expect many issues with no gold type at all. This is deliberate: it is the low-supervision case."
+
+[repos.issue_type_labels]
+bug = ["bug", "Bug"]
+enhancement = ["enhancement", "Enhancement", "feature"]
+documentation = ["documentation", "docs"]
+
+[repos.component_labels]
+# Textual does not maintain component labels. Left empty on purpose.

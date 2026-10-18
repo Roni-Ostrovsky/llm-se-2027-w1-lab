@@ -1,0 +1,17 @@
+# Runs before every commit. Installed by tools/verify_env.py.
+#
+# The secret scan is not decoration. In a room of 40 people using four
+# different model providers, someone will stage a real key this week.
+repos:
+  - repo: local
+    hooks:
+      - id: no-secrets
+        name: block credential-shaped strings
+        entry: python tools/check_secrets.py
+        language: system
+        stages: [pre-commit]
+      - id: no-env
+        name: block .env
+        entry: bash -c 'git diff --cached --name-only | grep -qx ".env" && { echo "refusing to commit .env"; exit 1; } || exit 0'
+        language: system
+        stages: [pre-commit]
