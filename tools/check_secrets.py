@@ -38,7 +38,13 @@ def staged_files() -> list[str]:
 
 
 def staged_content(path: str) -> str:
-    out = subprocess.run(["git", "show", f":{path}"], capture_output=True, text=True, check=False)
+    out = subprocess.run(
+        ["git", "show", f":{path}"],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
     return out.stdout
 
 
